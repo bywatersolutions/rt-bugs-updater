@@ -1,0 +1,11 @@
+{
+  "name": "rt-bugs-updater",
+  "version": "1.0.0",
+  "description": "Utility to update our RT bugs queue based on the Koha community bugzilla",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bywatersolutions/rt-bugs-updater.git"
+  },
+  "author": "Kyle M Hall",
+  "license": "GPL-3.0",
+}

@@ -1,0 +1,3 @@
+#!/bin/bash
+docker build -t rt-bugs-updater .
+docker run --env-file ~/.rt-bugs-updater.env rt-bugs-updater /app/rt-bugs-updater.pl "$@"

@@ -1,0 +1,2 @@
+#!/bin/bash
+docker pull bywater/rt-bugs-updater && docker run --env-file ~/.rt-bugs-updater.env bywater/rt-bugs-updater /app/rt-bugs--updater.pl "$@"
