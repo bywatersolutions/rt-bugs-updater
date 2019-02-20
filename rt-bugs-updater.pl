@@ -26,6 +26,8 @@ my ( $opt, $usage ) = describe_options(
 
 print( $usage->text ), exit if $opt->help;
 
+my $verbose = $opt->verbose || 0;
+
 my $rt_url  = $opt->rt_url;
 my $rt_user = $opt->rt_username;
 my $rt_pass = $opt->rt_password;
@@ -55,7 +57,7 @@ catch {
 
 
 # Create tracks
-say colored( 'Finding bug tickets', 'green' ) if $opt->verbose;
+say colored( 'Finding bug tickets', 'green' ) if $verbose;
 my $rt_query = q{Queue = 'Bugs' AND Status = '__Active__'};
 my @ids = $rt->search(
     type    => 'ticket',
@@ -69,7 +71,7 @@ foreach my $ticket_id (@ids) {
     sleep(1);    # pause for 1 second between requests so we don't kill RT
     my $ticket = $rt->show( type => 'ticket', id => $ticket_id );
 
-    say "Working on ticket " . colored( $ticket_id, 'cyan' ) if $opt->verbose > 1;
+    say "Working on ticket " . colored( $ticket_id, 'cyan' ) if $verbose > 1;
     my ($bug_id, $others) = split(',', $ticket->{'CF.{Community Bug}'} );
 
     $bug_id ||= q{};
@@ -78,11 +80,11 @@ foreach my $ticket_id (@ids) {
     $bug_id =~ s/^\s+|\s+$//g;
     $others =~ s/^\s+|\s+$//g;
 
-    say "Found multiple bugs, using bug " . colored( $bug_id, 'green' ) . ", skipping " . colored( $others, 'green' ) if $others && $opt->verbose;
+    say "Found multiple bugs, using bug " . colored( $bug_id, 'green' ) . ", skipping " . colored( $others, 'green' ) if $others && $verbose;
 
     unless ($bug_id) {
         say colored( "Bug not found for ticket $ticket_id", 'red' )
-          if $opt->verbose;
+          if $verbose;
         next;
     }
     say "Found related bug " . colored( $bug_id, 'green' );
@@ -93,7 +95,7 @@ foreach my $ticket_id (@ids) {
     my $bug_status = $bug->{status} || q{};
 
     if ( $ticket_status ne $bug_status ) {
-	say "RT ticket status " . colored( $ticket_status, 'cyan' ) . " doesn't match community bug status " . colored( $bug_status, 'green' ) . ", updating RT ticket." if $opt->verbose > 1;
+	say "RT ticket status " . colored( $ticket_status, 'cyan' ) . " doesn't match community bug status " . colored( $bug_status, 'green' ) . ", updating RT ticket." if $verbose > 1;
         $rt->edit(
             type => 'ticket',
             id   => $ticket_id,
@@ -102,8 +104,8 @@ foreach my $ticket_id (@ids) {
             }
         );
     } else {
-        say "Community bug and RT ticket status match: " . colored( $bug_status, 'yellow' ) . ", skipping update." if $opt->verbose > 1;
+        say "Community bug and RT ticket status match: " . colored( $bug_status, 'yellow' ) . ", skipping update." if $verbose > 1;
     }
 }
 
-say colored( 'Finished!', 'green' ) if $opt->verbose;
+say colored( 'Finished!', 'green' ) if $verbose;
