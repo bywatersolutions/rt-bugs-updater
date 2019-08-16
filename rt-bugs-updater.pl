@@ -58,7 +58,7 @@ catch {
 
 # Create tracks
 say colored( 'Finding bug tickets', 'green' ) if $verbose;
-my $rt_query = q{Queue = 'Bugs' AND Status = '__Active__'};
+my $rt_query = q{ Status = '__Active__' AND ( Queue = 'Bugs' OR Queue = 'Support' ) };
 my @ids = $rt->search(
     type    => 'ticket',
     query   => $rt_query,
