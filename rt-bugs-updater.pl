@@ -92,15 +92,19 @@ foreach my $ticket_id (@ids) {
     my $bug = $koha_client->get_bug($bug_id);
 
     my $ticket_status = $ticket->{'CF.{Bug Workflow}'} || q{};
-    my $bug_status = $bug->{status} || q{};
+    my $ticket_version = $ticket->{'CF.{Koha Version}'} || q{};
 
-    if ( $ticket_status ne $bug_status ) {
+    my $bug_status = $bug->{status} || q{};
+    my $bug_version = $bug->{cf_release_version} || q{};
+
+    if ( $ticket_status ne $bug_status || $ticket_version ne $bug_version ) {
 	say "RT ticket status " . colored( $ticket_status, 'cyan' ) . " doesn't match community bug status " . colored( $bug_status, 'green' ) . ", updating RT ticket." if $verbose > 1;
         $rt->edit(
             type => 'ticket',
             id   => $ticket_id,
             set  => {
                 "CF.{Bug Workflow}" => $bug_status,
+                "CF.{Koha Version}" => $bug_version,
             }
         );
     } else {
