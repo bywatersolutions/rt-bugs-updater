@@ -68,7 +68,7 @@ my @ids = $rt->search(
 my @tickets;
 
 foreach my $ticket_id (@ids) {
-    sleep(1);    # pause for 1 second between requests so we don't kill RT
+    sleep(10);    # pause for 1 second between requests so we don't kill RT
     my $ticket = $rt->show( type => 'ticket', id => $ticket_id );
 
     say "Working on ticket " . colored( $ticket_id, 'cyan' ) if $verbose > 1;
