@@ -68,7 +68,7 @@ my @ids = $rt->search(
 my @tickets;
 
 foreach my $ticket_id (@ids) {
-    sleep(10);    # pause for 1 second between requests so we don't kill RT
+    sleep(1);    # pause for 1 second between requests so we don't kill RT
     my $ticket = $rt->show( type => 'ticket', id => $ticket_id );
 
     say "Working on ticket " . colored( $ticket_id, 'cyan' ) if $verbose > 1;
@@ -87,6 +87,7 @@ foreach my $ticket_id (@ids) {
           if $verbose;
         next;
     }
+    sleep(4);    # Pause for another 4 seconds so we don't get banned from bugzilla
     say "Found related bug " . colored( $bug_id, 'green' );
 
     my $bug = $koha_client->get_bug($bug_id);
