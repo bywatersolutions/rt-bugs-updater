@@ -55,7 +55,7 @@ catch {
     die "Problem logging in: ", shift->message;
 };
 
-my @queues = ( 'Bugs', 'Support' );
+my @queues = ( 'Bugs', 'Support', 'Development' );
 foreach my $q ( @queues ) {
 
     # Create tracks
