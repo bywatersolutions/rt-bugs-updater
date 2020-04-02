@@ -146,6 +146,12 @@ foreach my $q (@queues) {
             my $bug_status  = $bug->{status}             || q{};
             my $bug_version = $bug->{cf_release_version} || q{};
 
+            # Trim leading and trailing whitespace
+            $ticket_status  =~ s/^\s+|\s+$//g;
+            $ticket_version =~ s/^\s+|\s+$//g;
+            $bug_status     =~ s/^\s+|\s+$//g;
+            $bug_version    =~ s/^\s+|\s+$//g;
+
             if (   lc($ticket_status) ne lc($bug_status)
                 || lc($ticket_version) ne lc($bug_version) )
             {
