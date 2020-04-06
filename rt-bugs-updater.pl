@@ -90,6 +90,7 @@ $ua->post(
     Content      => to_json( { text => "Running RT Bugs Updater!" } ),
 ) if $opt->slack;
 
+my @tickets_without_bugs;
 my @queues = ( 'Bugs', 'Support', 'Development' );
 foreach my $q (@queues) {
 
@@ -128,6 +129,9 @@ foreach my $q (@queues) {
         unless ($bug_id) {
             say colored( "Bug not found for ticket $ticket_id", 'red' )
               if $verbose;
+
+            $ticket->{id} = $ticket_id;
+            push( @tickets_without_bugs, $ticket );
 
             next;
         }
@@ -204,6 +208,15 @@ foreach my $q (@queues) {
             }
         };
     }
+}
+
+foreach my $ticket ( @tickets_without_bugs ) {
+    say colored( "Bug not found for ticket $ticket->{id}", 'red' ) if $verbose;
+    $ua->post(
+        $opt->slack,
+        Content_Type => 'application/json',
+        Content => to_json( { text => "No bug found for <$rt_url/Ticket/Display.html?id=$ticket->{id}|Ticket $ticket->{id}: $ticket->{Subject}>" } ),
+    ) if $opt->slack;
 }
 
 $ua->post(
