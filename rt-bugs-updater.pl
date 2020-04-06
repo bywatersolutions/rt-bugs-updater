@@ -149,29 +149,39 @@ foreach my $q (@queues) {
             # Trim leading and trailing whitespace
             $ticket_status  =~ s/^\s+|\s+$//g;
             $ticket_version =~ s/^\s+|\s+$//g;
-            $bug_status     =~ s/^\s+|\s+$//g;
-            $bug_version    =~ s/^\s+|\s+$//g;
+
+            # Remove all whitespace from bug version to match RT version: '20.05.00, 19.11.03' => '20.05.00,19.11.03'
+            $bug_version    =~ s/\s+|\s+//g;
 
             if (   lc($ticket_status) ne lc($bug_status)
                 || lc($ticket_version) ne lc($bug_version) )
             {
-                say "RT ticket status "
+                say "RT ticket status '"
                   . colored( $ticket_status, 'cyan' )
-                  . " doesn't match community bug status "
+                  . "' doesn't match community bug status '"
                   . colored( $bug_status, 'green' )
-                  . ", updating RT ticket."
-                  if $verbose > 1;
+                  . "', updating RT ticket."
+                  if $verbose > 1 && lc($ticket_status) ne lc($bug_status);
+
+                say "RT ticket version '"
+                  . colored( $ticket_version, 'cyan' )
+                  . "' doesn't match community bug version '"
+                  . colored( $bug_version, 'green' )
+                  . "', updating RT ticket."
+                  if $verbose > 1 && lc($ticket_version) ne lc($bug_version);
 
                 send_slack_bug_update(
                     {
-                        bug           => $bug,
-                        bug_status    => $bug_status,
-                        bz_koha_url   => $bz_koha_url,
-                        rt_url        => $rt_url,
-                        ticket        => $ticket,
-                        ticket_id     => $ticket_id,
-                        ticket_status => $ticket_status,
-                        ua            => $ua,
+                        bug            => $bug,
+                        bug_status     => $bug_status,
+                        bug_version    => $bug_version,
+                        bz_koha_url    => $bz_koha_url,
+                        rt_url         => $rt_url,
+                        ticket         => $ticket,
+                        ticket_id      => $ticket_id,
+                        ticket_status  => $ticket_status,
+                        ticket_version => $ticket_version,
+                        ua             => $ua,
                     }
                 );
 
@@ -185,8 +195,10 @@ foreach my $q (@queues) {
                 );
             }
             else {
-                say "Community bug and RT ticket status match: "
+                say "Community bug and RT ticket fields match: "
                   . colored( $bug_status, 'yellow' )
+                  . " / "
+                  . colored ( $bug_version, 'yellow' )
                   . ", skipping update."
                   if $verbose > 1;
             }
@@ -205,14 +217,53 @@ say colored( 'Finished!', 'green' ) if $verbose;
 sub send_slack_bug_update {
     my ($params) = @_;
 
-    my $bug           = $params->{bug};
-    my $bug_status    = $params->{bug_status};
-    my $bz_koha_url   = $params->{bz_koha_url};
-    my $rt_url        = $params->{rt_url};
-    my $ticket        = $params->{ticket};
-    my $ticket_id     = $params->{ticket_id};
-    my $ticket_status = $params->{ticket_status};
-    my $ua            = $params->{ua};
+    my $bug            = $params->{bug};
+    my $bug_status     = $params->{bug_status};
+    my $bz_koha_url    = $params->{bz_koha_url};
+    my $rt_url         = $params->{rt_url};
+    my $ticket         = $params->{ticket};
+    my $ticket_id      = $params->{ticket_id};
+    my $ticket_status  = $params->{ticket_status};
+    my $ticket_version = $params->{ticket_version};
+    my $bug_version    = $params->{bug_version};
+    my $ua             = $params->{ua};
+
+    my @fields;
+    if ( lc($ticket_status) ne lc($bug_status) ) {
+        push(
+            @fields,
+            (
+                {
+                    title => "From Status",
+                    value => $ticket_status,
+                    short => JSON::true,
+                },
+                {
+                    title => "To Status",
+                    value => $bug_status,
+                    short => JSON::true,
+                }
+            )
+        );
+    }
+
+    if ( lc($ticket_version) ne lc($bug_version) ) {
+        push(
+            @fields,
+            (
+                {
+                    title => "From Version",
+                    value => $ticket_version,
+                    short => JSON::true,
+                },
+                {
+                    title => "To Version",
+                    value => $bug_version,
+                    short => JSON::true,
+                }
+            )
+        );
+    }
 
     my $json_data = {
         "attachments" => [
@@ -220,18 +271,7 @@ sub send_slack_bug_update {
                 #pretext => "Pretext _supports_ mrkdwn",
                 title => "Updated <$rt_url/Ticket/Display.html?id=$ticket_id|Ticket $ticket_id: $ticket->{Subject}>",
                 text => "<$bz_koha_url/show_bug.cgi?id=$bug->{id}|Boog $bug->{id}: $bug->{summary}>",
-                fields => [
-                    {
-                        title => "From",
-                        value => $ticket_status,
-                        short => JSON::true,
-                    },
-                    {
-                        title => "To",
-                        value => $bug_status,
-                        short => JSON::true,
-                    }
-                ],
+                fields => \@fields,
                 mrkdwn_in => [ "text", "pretext", "fields" ],
             }
         ]
