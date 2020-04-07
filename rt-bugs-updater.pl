@@ -90,8 +90,9 @@ $ua->post(
     Content      => to_json( { text => "Running RT Bugs Updater!" } ),
 ) if $opt->slack;
 
-my @queues = ( 'Bugs', 'Support', 'Development' );
+my @queues = ( 'Development', 'Bugs', 'Support' );
 foreach my $q (@queues) {
+    $ping_slack = $q eq 'Development';
 
     # Create tracks
     say colored( "Finding '$q' tickets", 'green' ) if $verbose;
@@ -183,7 +184,7 @@ foreach my $q (@queues) {
                         ticket_version => $ticket_version,
                         ua             => $ua,
                     }
-                );
+                ) if $ping_slack;
 
                 $rt->edit(
                     type => 'ticket',
