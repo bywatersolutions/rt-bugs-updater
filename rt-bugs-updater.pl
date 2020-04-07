@@ -92,7 +92,7 @@ $ua->post(
 
 my @queues = ( 'Development', 'Bugs', 'Support' );
 foreach my $q (@queues) {
-    $ping_slack = $q eq 'Development';
+    my $ping_slack = $q eq 'Development';
 
     # Create tracks
     say colored( "Finding '$q' tickets", 'green' ) if $verbose;
@@ -203,6 +203,8 @@ foreach my $q (@queues) {
                   . ", skipping update."
                   if $verbose > 1;
             }
+        } catch {
+            say colored( "Something went wrong updating ticket $ticket_id", 'red' );
         };
     }
 }
