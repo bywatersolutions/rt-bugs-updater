@@ -4,7 +4,8 @@ WORKDIR /app
 
 RUN apk add --no-cache \
     perl \
-    perl-app-cpanminus
+    perl-app-cpanminus \
+    wget
 
 # Copy all files to workdir
 COPY . .
