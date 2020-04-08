@@ -5,6 +5,7 @@ WORKDIR /app
 RUN apk add --no-cache \
     perl \
     perl-app-cpanminus \
+    perl-dev \
     wget \
     build-base
 
