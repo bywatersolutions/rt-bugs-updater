@@ -3,11 +3,14 @@ FROM alpine:3
 WORKDIR /app
 
 RUN apk add --no-cache \
+    build-base \
+    openssl \
+    openssl-dev \
     perl \
     perl-app-cpanminus \
     perl-dev \
     wget \
-    build-base
+    zlib-dev
 
 # Copy all files to workdir
 COPY . .
