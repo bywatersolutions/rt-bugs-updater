@@ -56,6 +56,8 @@ print( $usage->text ), exit if $opt->help;
 
 my $verbose = $opt->verbose || 0;
 
+say colored( 'Started: ' . localtime(), 'green' ) if $verbose;
+
 my $rt_url  = $opt->rt_url;
 my $rt_user = $opt->rt_username;
 my $rt_pass = $opt->rt_password;
@@ -215,7 +217,7 @@ $ua->post(
     Content => to_json( { text => "RT Bugs Updater has finished running!" } ),
 ) if $opt->slack;
 
-say colored( 'Finished!', 'green' ) if $verbose;
+say colored( 'Finished: ' . localtime(), 'green' ) if $verbose;
 
 sub send_slack_bug_update {
     my ($params) = @_;
