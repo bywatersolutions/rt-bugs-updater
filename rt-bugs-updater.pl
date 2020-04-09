@@ -149,6 +149,10 @@ foreach my $q (@queues) {
             my $bug_status  = $bug->{status}             || q{};
             my $bug_version = $bug->{cf_release_version} || q{};
 
+            # Versions are not sorting in the same way in RT and Bugzilla
+            $ticket_version = join( ',', sort( split( ',', $ticket_version ) ) );
+            $bug_version =    join( ',', sort( split( ',', $bug_version ) ) );
+
             # Trim leading and trailing whitespace
             $ticket_status  =~ s/^\s+|\s+$//g;
             $ticket_version =~ s/^\s+|\s+$//g;
